@@ -85,6 +85,18 @@ pull request. It installs dependencies, runs the unit tests, builds the Docker
 image and smoke-tests the running container. Watch it under the **Actions** tab
 of your fork, or trigger it by pushing a commit / opening a PR.
 
+## Cloud mapping
+
+The local flow maps directly to a cloud release pipeline:
+
+1. The local CI job (`npm install`, `npm test`, `docker build`) becomes a GitHub Actions or Cloud Build step that runs on every push.
+2. The image is pushed to a registry such as Artifact Registry, tagged with a version or commit SHA.
+3. A deployment target such as Cloud Run uses that image reference and starts the same container configuration with environment variables and health checks.
+4. Prometheus-style scraping in this lab is analogous to Cloud Monitoring / managed scraping of the app's `/metrics` endpoint, and Grafana becomes a dashboarding layer that queries the metrics source.
+5. A bad release is rolled back by reverting the Git commit or redeploying the previous image tag, then validating the app health endpoint before resuming traffic.
+
+This keeps the same release pattern without needing billing or a cloud subscription: commit -> automated build -> registry image -> deploy -> active monitoring -> quick rollback.
+
 ## Rollback
 
 Releases are tagged in Git. You can inspect history with:
